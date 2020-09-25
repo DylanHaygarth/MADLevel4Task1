@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.core.view.get
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_shopping.*
@@ -58,9 +59,8 @@ class ShoppingFragment : Fragment() {
         rvProducts.adapter = productAdapter
         rvProducts.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
-        products.add(ShoppingProduct("kwarktaart", 6))
-        products.add(ShoppingProduct("ei", 10))
-        productAdapter.notifyDataSetChanged()
+        // Attaches item touch helper to recycler view
+        createItemTouchHelper().attachToRecyclerView(rvProducts)
     }
 
     // retrieves the products from the database. Clears all products currently in there and replaces with retrieved ones.
@@ -127,5 +127,32 @@ class ShoppingFragment : Fragment() {
             Toast.makeText(activity, "Please fill in the fields", Toast.LENGTH_LONG).show()
             false
         }
+    }
+
+    private fun createItemTouchHelper(): ItemTouchHelper {
+        val callback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // gets the position of the product based on where user swipes
+                val position = viewHolder.adapterPosition
+                val productToDelete = products[position]
+
+                // deletes product from database on swiped location
+                mainScope.launch {
+                    withContext(Dispatchers.IO) {
+                        productRepository.deleteProduct(productToDelete)
+                    }
+                    getShoppingListFromDatabase()
+                }
+            }
+        }
+        return ItemTouchHelper(callback)
     }
 }
