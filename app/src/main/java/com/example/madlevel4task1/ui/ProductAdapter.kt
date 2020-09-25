@@ -1,9 +1,11 @@
-package com.example.madlevel4task1
+package com.example.madlevel4task1.ui
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.madlevel4task1.R
+import com.example.madlevel4task1.model.ShoppingProduct
 import kotlinx.android.synthetic.main.item_shopping_product.view.*
 
 class ProductAdapter(private val products: List<ShoppingProduct>) : RecyclerView.Adapter<ProductAdapter.ViewHolder>() {

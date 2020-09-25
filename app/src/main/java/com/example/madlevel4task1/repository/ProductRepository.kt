@@ -1,12 +1,18 @@
-package com.example.madlevel4task1
+package com.example.madlevel4task1.repository
 
 import android.content.Context
+import com.example.madlevel4task1.database.ShoppingListRoomDatabase
+import com.example.madlevel4task1.model.ShoppingProduct
+import com.example.madlevel4task1.dao.ProductDao
 
 class ProductRepository(context: Context) {
     private val productDao: ProductDao
 
     init {
-        val database = ShoppingListRoomDatabase.getDatabase(context)
+        val database =
+            ShoppingListRoomDatabase.getDatabase(
+                context
+            )
         productDao = database!!.productDao()
     }
 

@@ -1,23 +1,21 @@
-package com.example.madlevel4task1
+package com.example.madlevel4task1.ui
 
 import android.app.AlertDialog
-import android.content.ContentValues.TAG
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.core.view.get
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.madlevel4task1.R
+import com.example.madlevel4task1.model.ShoppingProduct
+import com.example.madlevel4task1.repository.ProductRepository
 import kotlinx.android.synthetic.main.fragment_shopping.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +25,8 @@ import kotlinx.coroutines.withContext
 class ShoppingFragment : Fragment() {
     private lateinit var productRepository: ProductRepository
     private val products = arrayListOf<ShoppingProduct>()
-    private val productAdapter = ProductAdapter(products)
+    private val productAdapter =
+        ProductAdapter(products)
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreateView(
@@ -42,15 +41,15 @@ class ShoppingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Sets up the repository with the required context from this class
-        productRepository = ProductRepository(requireContext())
+        productRepository =
+            ProductRepository(
+                requireContext()
+            )
         getShoppingListFromDatabase()
 
         // sets up the recycler view
         initViews()
 
-        fabAdd.setOnClickListener {
-            showAddProductdialog();
-        }
     }
 
     private fun initViews() {
@@ -61,7 +60,28 @@ class ShoppingFragment : Fragment() {
 
         // Attaches item touch helper to recycler view
         createItemTouchHelper().attachToRecyclerView(rvProducts)
+
+        // sets up a listener for adding a product
+        fabAdd.setOnClickListener {
+            showAddProductdialog();
+        }
+
+        // sets up a listener for deleting all products
+        fabDelete.setOnClickListener {
+            removeAllProducts();
+        }
     }
+
+    // removes all products from the shopping list
+    private fun removeAllProducts() {
+        mainScope.launch {
+            withContext(Dispatchers.IO) {
+                productRepository.deleteAllProducts()
+            }
+            getShoppingListFromDatabase()
+        }
+    }
+
 
     // retrieves the products from the database. Clears all products currently in there and replaces with retrieved ones.
     private fun getShoppingListFromDatabase() {
